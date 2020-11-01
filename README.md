@@ -1,1 +1,1 @@
-# shop-shop-redux
+# shop-shop
