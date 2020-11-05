@@ -14,7 +14,7 @@ const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
 
 const Cart = () => {
   const [ state, dispatch ] = useStoreContext();
-  console.log(state);
+  //console.log(state);
 
   // data const will contain checkout session, but only after the query is called with the getCheckout function in the submitCheckout handler 
   const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
