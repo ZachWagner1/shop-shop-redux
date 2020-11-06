@@ -67,4 +67,4 @@ export const QUERY_CHECKOUT = gql`
       session
     }
   }
-`
+`;

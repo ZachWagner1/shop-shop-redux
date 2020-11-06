@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import CartItem from '../CartItem';
 import Auth from '../../utils/auth';
 import './style.css';
 
-import { useStoreContext } from '../../utils/GlobalState';
 import { TOGGLE_CART, ADD_MULTIPLE_TO_CART } from '../../utils/actions';
 import { idbPromise } from '../../utils/helpers';
 import { QUERY_CHECKOUT } from '../../utils/queries';
@@ -13,30 +13,34 @@ import { useLazyQuery } from '@apollo/react-hooks';
 const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
 
 const Cart = () => {
-  const [ state, dispatch ] = useStoreContext();
-  //console.log(state);
+	const state = useSelector((state) => state);
+	const dispatch = useDispatch();
 
-  // data const will contain checkout session, but only after the query is called with the getCheckout function in the submitCheckout handler 
-  const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
-  
-  useEffect(() => {
-    async function getCart() {
-      const cart = await idbPromise('cart', 'get');
-      dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
-    }
+	const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
 
-    if (!state.cart.length) {
-      getCart();
-    }
-  }, [state.cart.length, dispatch])
+	useEffect(
+		() => {
+			async function getCart() {
+				const cart = await idbPromise('cart', 'get');
+				dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
+			}
+			if (!state.cart.length) {
+				getCart();
+			}
+		},
+		[state.cart.length, dispatch]
+	);
 
-  useEffect(() => {
-    if (data) {
-      stripePromise.then(res => {
-        res.redirectToCheckout({ sessionId: data.checkout.session })
-      })
-    }
-  }, [data]);
+	useEffect(
+		() => {
+			if (data) {
+				stripePromise.then((res) => {
+					res.redirectToCheckout({ sessionId: data.checkout.session });
+				});
+			}
+		},
+		[data]
+	);
 
 	function toggleCart() {
 		dispatch({ type: TOGGLE_CART });
@@ -60,19 +64,19 @@ const Cart = () => {
 		);
 	}
 
-  function submitCheckout() {
-    const productIds = [];
+	function submitCheckout() {
+		const productIds = [];
 
-    state.cart.forEach((item) => {
-      for (let i = 0; i < item.purchaseQuantity; i++) {
-        productIds.push(item._id);
-      }
-    });
+		state.cart.forEach((item) => {
+			for (let i = 0; i < item.purchaseQuantity; i++) {
+				productIds.push(item._id);
+			}
+		});
 
-    getCheckout({
-      variables: { products: productIds }
-    })
-  }
+		getCheckout({
+			variables: { products: productIds }
+		})
+	}
 
 	return (
 		<div className="cart">
@@ -88,18 +92,18 @@ const Cart = () => {
 						{Auth.loggedIn() ? (
 							<button onClick={submitCheckout}>Checkout</button>
 						) : (
-							<span>(log in to check out)</span>
-						)}
+								<span>(log in to check out)</span>
+							)}
 					</div>
 				</div>
 			) : (
-				<h3>
-					<span role="img" aria-label="shocked">
-						😨
+					<h3>
+						<span role="img" aria-label="shocked">
+							😨
 					</span>
           You haven't added anything to your cart yet
-				</h3>
-			)}
+					</h3>
+				)}
 		</div>
 	);
 };
