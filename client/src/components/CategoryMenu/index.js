@@ -7,12 +7,12 @@ import { updateCategories, updateCurrentCategory } from '../../utils/actionCreat
 import { idbPromise } from '../../utils/helpers';
 
 function CategoryMenu () {
-	const { categories } = useSelector((state) => state);
-	const dispatch = useDispatch();
   
  	const { loading, data: categoryData } = useQuery(QUERY_CATEGORIES);
 
-  	const { loading, data: categoryData } = useQuery(QUERY_CATEGORIES);
+	 const { categories } = useSelector((state) => state);
+ 
+	 const dispatch = useDispatch();
 
   useEffect(
 	  () => {
@@ -49,7 +49,18 @@ const handleClick = (id) => {
   return (
 	  <div>
 		  <h2>Choose a Category:</h2>
-		  {categories.map((item) => (
+		  {categories ? (
+				categories.map((item) => (
+					<button
+						key={item._id}
+						onClick={() => {
+							handleClick(item._id);
+						}}
+					>
+						{item.name}
+					</button>
+				))
+			) : null}
 			  <button
 				  key={item._id}
 				  onClick={() => {
@@ -58,7 +69,6 @@ const handleClick = (id) => {
 			  >
 				  {item.name}
 			  </button>
-		  ))}
 	  </div>
   );
 }

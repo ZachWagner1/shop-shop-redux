@@ -79,7 +79,8 @@ function Detail() {
   const removeFromCart = () => {
     dispatch({
       type: REMOVE_FROM_CART,
-      _id: currentProduct._id
+      _id: currentProduct._id,
+      cart: cart
     })
     
     // upon removal from cart, delete the item from IndexedDB using the 'currentProduct._id' to locate what to remove
