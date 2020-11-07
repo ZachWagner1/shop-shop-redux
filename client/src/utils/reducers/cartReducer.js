@@ -7,7 +7,7 @@ import {
     TOGGLE_CART
 } from '../../utils/actions';
 
-const cartReducer = (state = null, action) => {
+const cartReducer = (state, action) => {
     switch (action.type) {
         case ADD_TO_CART:
             return {
