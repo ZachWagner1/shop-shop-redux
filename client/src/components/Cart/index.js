@@ -5,6 +5,7 @@ import Auth from '../../utils/auth';
 import './style.css';
 
 import { TOGGLE_CART, ADD_MULTIPLE_TO_CART } from '../../utils/actions';
+import { toggleCart, addMultipleToCart } from '../../utils/actionCreators';
 import { idbPromise } from '../../utils/helpers';
 import { QUERY_CHECKOUT } from '../../utils/queries';
 import { loadStripe } from '@stripe/stripe-js';
@@ -22,7 +23,7 @@ const Cart = () => {
 		() => {
 			async function getCart() {
 				const cart = await idbPromise('cart', 'get');
-				dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
+				dispatch(addMultipleToCart([ ...cart ] ));
 			}
 			if (!state.cart.length) {
 				getCart();
@@ -42,8 +43,8 @@ const Cart = () => {
 		[data]
 	);
 
-	function toggleCart() {
-		dispatch({ type: TOGGLE_CART });
+	function handleToggleCart() {
+		dispatch(toggleCart());
 	}
 
 	function calculateTotal() {
@@ -56,7 +57,7 @@ const Cart = () => {
 
 	if (!state.cartOpen) {
 		return (
-			<div className="cart-closed" onClick={toggleCart}>
+			<div className="cart-closed" onClick={handleToggleCart}>
 				<span role="img" aria-label="trash">
 					🛒
 				</span>
@@ -80,7 +81,7 @@ const Cart = () => {
 
 	return (
 		<div className="cart">
-			<div className="close" onClick={toggleCart}>
+			<div className="close" onClick={handleToggleCart}>
 				[close]
 			</div>
 			<h2>Shopping Cart</h2>
