@@ -14,6 +14,7 @@ import OrderHistory from './pages/OrderHistory';
 import Success from './pages/Success';
 
 import store from './utils/store';
+console.log(store.getState());
 
 const client = new ApolloClient({
 	request: (operation) => {
