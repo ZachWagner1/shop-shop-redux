@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useQuery } from '@apollo/react-hooks';
-import { 
-  REMOVE_FROM_CART,
-  UPDATE_CART_QUANTITY,
-  ADD_TO_CART,
-  UPDATE_PRODUCTS
-} from '../utils/actions';
+import {
+  removeFromCart,
+  updateCartQuantity,
+  addToCart,
+  updateProducts
+} from '../utils/actionCreators';
 import { idbPromise } from '../utils/helpers';
-import { QUERY_PRODUCTS } from "../utils/queries";
-import spinner from '../assets/spinner.gif'
-import Cart from "../components/Cart";
+import { QUERY_PRODUCTS } from '../utils/queries';
+import spinner from '../assets/spinner.gif';
+import Cart from '../components/Cart';
 
 function Detail() {
   const state = useSelector((state) => state);
-	const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const { id } = useParams();
 
@@ -25,96 +25,72 @@ function Detail() {
 
   const { products, cart } = state;
 
-  useEffect(() => {
-    // already in global store
-    if (products.length) {
-      setCurrentProduct(products.find(product => product._id === id));
-      // retrieved from server
-    }  else if (data) {
-      dispatch({
-        type: UPDATE_PRODUCTS,
-        products: data.products
-      });
+  useEffect(
+    () => {
+      // already in global store
+      if (products.length) {
+        setCurrentProduct(products.find((product) => product._id === id));
+        // retrieved from server
+      } else if (data) {
+        dispatch(updateProducts(data.products));
 
-      data.products.forEach(product => {
-        idbPromise('products', 'put', product);
-      })
-    // get cache from idb  
-    } else if (!loading) {
-      idbPromise('products', 'get').then(indexedProducts => {
-        dispatch({
-          type: UPDATE_PRODUCTS,
-          products: indexedProducts
-        })
-      })
-    }
-  }, [products, data, loading, dispatch, id]);
+        data.products.forEach((product) => {
+          idbPromise('products', 'put', product);
+        });
+        // get cache from idb
+      } else if (!loading) {
+        idbPromise('products', 'get').then((indexedProducts) => {
+          dispatch(updateProducts(indexedProducts));
+        });
+      }
+    },
+    [products, data, loading, dispatch, id]
+  );
 
-  const addToCart = () => {
-		// find the cart item with the matching id
-		const itemInCart = cart.find((cartItem) => cartItem._id === id);
+  const addItemToCart = () => {
+    // find the cart item with the matching id
+    const itemInCart = cart.find((cartItem) => cartItem._id === id);
 
-		// if there was a match, call UPDATE with a new purchase quantity
-		if (itemInCart) {
-			dispatch({
-				type             : UPDATE_CART_QUANTITY,
-				_id              : id,
-				purchaseQuantity : parseInt(itemInCart.purchaseQuantity) + 1
-      });
-      // if we're updating quantity, use existing item data and increment purchaseQuantity value by one
+    // if there was a match, call UPDATE with a new purchase quantity
+    if (itemInCart) {
+      dispatch(updateCartQuantity(id, (parseInt(itemInCart.purchaseQuantity) + 1)));
       idbPromise('cart', 'put', {
         ...itemInCart,
         purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
-      })
-		} else {
-			dispatch({
-				type    : ADD_TO_CART,
-				product : { ...currentProduct, purchaseQuantity: 1 }
       });
-      // if product isn't in the cart yet, add it to the current shopping cart in IndexedDB
+    } else {
+      dispatch(addToCart({ ...currentProduct, purchaseQuantity: 1 }));
       idbPromise('cart', 'put', { ...currentProduct, purchaseQuantity: 1 });
-		}
+    }
   }
 
-  const removeFromCart = () => {
-    dispatch({
-      type: REMOVE_FROM_CART,
-      _id: currentProduct._id,
-      cart: cart
-    })
-    
+  const removeItemFromCart = () => {
+    dispatch(removeFromCart(currentProduct._id));
+
     // upon removal from cart, delete the item from IndexedDB using the 'currentProduct._id' to locate what to remove
-    idbPromise('cart', 'delete', { ...currentProduct })
-    
-  }
+    idbPromise('cart', 'delete', { ...currentProduct });
+  };
 
   return (
     <>
       {currentProduct ? (
         <div className="container my-1">
-          <Link to="/">
-            ← Back to Products
-          </Link>
+          <Link to="/">← Back to Products</Link>
 
           <h2>{currentProduct.name}</h2>
 
-          <p>
-            {currentProduct.description}
-          </p>
+          <p>{currentProduct.description}</p>
 
           <p>
             <strong>Price:</strong>
-            ${currentProduct.price}
-            {" "}
-            <button onClick={addToCart}>
-              Add to Cart
-            </button>
+						${currentProduct.price}{' '}
+            <button onClick={addItemToCart}>Add to Cart</button>
             <button
-              disabled={!cart.find(p => p._id === currentProduct._id)}
-              onClick={removeFromCart}
+              disabled={!cart.find((p) => p._id === currentProduct._id)}
+              onClick={removeItemFromCart}
             >
               Remove from Cart
-            </button>
+						</button>
           </p>
 
           <img
@@ -123,12 +99,10 @@ function Detail() {
           />
         </div>
       ) : null}
-      {
-        loading ? <img src={spinner} alt="loading" /> : null
-      }
+      {loading ? <img src={spinner} alt="loading" /> : null}
       <Cart />
     </>
   );
-};
+}
 
 export default Detail;
