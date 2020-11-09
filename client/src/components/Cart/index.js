@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import CartItem from '../CartItem';
+import { useLazyQuery } from '@apollo/react-hooks';
+import { QUERY_CHECKOUT } from '../../utils/queries';
+import { toggleCart, addMultipleToCart } from '../../utils/actions';
 import Auth from '../../utils/auth';
+import { idbPromise } from '../../utils/helpers';
+import { loadStripe } from '@stripe/stripe-js';
 import './style.css';
 
-import { toggleCart, addMultipleToCart } from '../../utils/actionCreators';
-import { idbPromise } from '../../utils/helpers';
-import { QUERY_CHECKOUT } from '../../utils/queries';
-import { loadStripe } from '@stripe/stripe-js';
-import { useLazyQuery } from '@apollo/react-hooks';
+import CartItem from '../CartItem';
 
 const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
 
@@ -16,14 +16,16 @@ const Cart = () => {
 	const state = useSelector((state) => state);
 	const dispatch = useDispatch();
 
+	// data const will contain checkout session, but only after the query is called with the getCheckout function in the submitCheckout handler
 	const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
 
 	useEffect(
 		() => {
 			async function getCart() {
 				const cart = await idbPromise('cart', 'get');
-				dispatch(addMultipleToCart([ ...cart ] ));
+				dispatch(addMultipleToCart([...cart]));
 			}
+
 			if (!state.cart.length) {
 				getCart();
 			}
@@ -75,7 +77,7 @@ const Cart = () => {
 
 		getCheckout({
 			variables: { products: productIds }
-		})
+		});
 	}
 
 	return (
@@ -101,7 +103,7 @@ const Cart = () => {
 						<span role="img" aria-label="shocked">
 							😨
 					</span>
-          You haven't added anything to your cart yet
+					You haven't added anything to your cart yet
 					</h3>
 				)}
 		</div>

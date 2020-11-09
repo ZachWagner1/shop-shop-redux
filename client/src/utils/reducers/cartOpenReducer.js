@@ -4,7 +4,7 @@ import {
     UPDATE_CART_QUANTITY,
     CLEAR_CART,
     TOGGLE_CART
-} from '../../utils/actions';
+} from '../../utils/types';
 
 const cartOpenReducer = (state = false, action) => {
     switch (action.type) {
@@ -14,7 +14,7 @@ const cartOpenReducer = (state = false, action) => {
         case REMOVE_FROM_CART:
             let newState = action.cart.filter((product) => {
                 return product._id !== action._id;
-            })
+            });
             return newState.length > 0;
 
         case UPDATE_CART_QUANTITY:
@@ -24,7 +24,7 @@ const cartOpenReducer = (state = false, action) => {
             return false;
 
         case TOGGLE_CART:
-            return !state
+            return !state;
 
         default:
             return state;

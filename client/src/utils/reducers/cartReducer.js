@@ -4,23 +4,22 @@ import {
     REMOVE_FROM_CART,
     UPDATE_CART_QUANTITY,
     CLEAR_CART
-} from '../../utils/actions';
+} from '../../utils/types';
 
 const cartReducer = (state = [], action) => {
     switch (action.type) {
         case ADD_TO_CART:
-            return [...state, action.product]
+            return [...state, action.product];
 
         case ADD_MULTIPLE_TO_CART:
-            return [...state, ...action.products]
+            return [...state, ...action.products];
 
         case REMOVE_FROM_CART:
-
             let newState = action.cart.filter((product) => {
-                return product._id !== action._id
+                return product._id !== action._id;
             });
-            console.log("Old cart: ", action.cart)
-            console.log("New cart: ", newState)
+            console.log('Old cart: ', action.cart);
+            console.log('New cart: ', newState);
 
             return newState;
 
@@ -30,7 +29,7 @@ const cartReducer = (state = [], action) => {
                     product.purchaseQuantity = action.purchaseQuantity;
                 }
                 return product;
-            })
+            });
 
         case CLEAR_CART:
             return [];
@@ -38,6 +37,6 @@ const cartReducer = (state = [], action) => {
         default:
             return state;
     }
-}
+};
 
 export default cartReducer;

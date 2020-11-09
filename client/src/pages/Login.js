@@ -9,17 +9,17 @@ function Login(props) {
   const [login, { error }] = useMutation(LOGIN);
 
   const handleFormSubmit = async (event) => {
-		event.preventDefault();
-		try {
-			const mutationResponse = await login({
-				variables: { email: formState.email, password: formState.password }
-			});
-			const token = mutationResponse.data.login.token;
-			Auth.login(token);
-		} catch (e) {
-			console.log(e);
-		}
-	};
+    event.preventDefault();
+    try {
+      const mutationResponse = await login({
+        variables: { email: formState.email, password: formState.password }
+      });
+      const token = mutationResponse.data.login.token;
+      Auth.login(token);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -30,8 +30,8 @@ function Login(props) {
   };
 
   return (
-		<div className="container my-1">
-			<Link to="/signup">← Go to Signup</Link>
+    <div className="container my-1">
+      <Link to="/signup">← Go to Signup</Link>
 
       <h2>Login</h2>
       <form onSubmit={handleFormSubmit}>
@@ -55,19 +55,19 @@ function Login(props) {
             onChange={handleChange}
           />
         </div>
-				{error ? (
-					<div>
-						<p className="error-text">
-							The provided credentials are incorrect
+        {error ? (
+          <div>
+            <p className="error-text">
+              The provided credentials are incorrect
 						</p>
-					</div>
-				) : null}
-				<div className="flex-row flex-end">
-					<button type="submit">Submit</button>
-				</div>
-			</form>
-		</div>
-	);
+          </div>
+        ) : null}
+        <div className="flex-row flex-end">
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </div>
+  );
 }
 
 export default Login;

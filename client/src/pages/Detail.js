@@ -2,19 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useQuery } from '@apollo/react-hooks';
+import { QUERY_PRODUCTS } from '../utils/queries';
 import {
   removeFromCart,
   updateCartQuantity,
   addToCart,
   updateProducts
-} from '../utils/actionCreators';
+} from '../utils/actions';
 import { idbPromise } from '../utils/helpers';
-import { QUERY_PRODUCTS } from '../utils/queries';
 import spinner from '../assets/spinner.gif';
+
 import Cart from '../components/Cart';
 
 function Detail() {
   const state = useSelector((state) => state);
+  const { products, cart } = state;
+
   const dispatch = useDispatch();
 
   const { id } = useParams();
@@ -23,14 +26,13 @@ function Detail() {
 
   const { loading, data } = useQuery(QUERY_PRODUCTS);
 
-  const { products, cart } = state;
 
   useEffect(
     () => {
       // already in global store
       if (products.length) {
         setCurrentProduct(products.find((product) => product._id === id));
-        // retrieved from server
+        // retrieve from server
       } else if (data) {
         dispatch(updateProducts(data.products));
 
@@ -48,24 +50,26 @@ function Detail() {
   );
 
   const addItemToCart = () => {
-    // find the cart item with the matching id
+    // find cart item with matching id
     const itemInCart = cart.find((cartItem) => cartItem._id === id);
 
-    // if there was a match, call UPDATE with a new purchase quantity
+    // if match, call UPDATE with new purchase quantity
     if (itemInCart) {
       dispatch(updateCartQuantity(id, (parseInt(itemInCart.purchaseQuantity) + 1)));
+      // updating quantity, use existing item data and increment purchaseQuantity value by one
       idbPromise('cart', 'put', {
         ...itemInCart,
         purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
       });
     } else {
       dispatch(addToCart({ ...currentProduct, purchaseQuantity: 1 }));
+      // if product isn't in cart yet, add it to the current shopping cart in IndexedDB
       idbPromise('cart', 'put', { ...currentProduct, purchaseQuantity: 1 });
     }
-  }
+  };
 
   const removeItemFromCart = () => {
-    dispatch(removeFromCart(currentProduct._id));
+    dispatch(removeFromCart(currentProduct._id, cart));
 
     // upon removal from cart, delete the item from IndexedDB using the 'currentProduct._id' to locate what to remove
     idbPromise('cart', 'delete', { ...currentProduct });

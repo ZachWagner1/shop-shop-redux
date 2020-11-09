@@ -1,33 +1,33 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useQuery } from '@apollo/react-hooks';
-import { updateProducts } from '../../utils/actionCreators';
-import { idbPromise } from '../../utils/helpers';
-import ProductItem from '../ProductItem';
 import { QUERY_PRODUCTS } from '../../utils/queries';
+import { updateProducts } from '../../utils/actions';
+import { idbPromise } from '../../utils/helpers';
 import spinner from '../../assets/spinner.gif';
 
+import ProductItem from '../ProductItem';
+
 function ProductList() {
-  const state = useSelector((state) => state);
+	const state = useSelector((state) => state);
 	const dispatch = useDispatch();
 
-  const { currentCategory } = state;
+	const { currentCategory } = state;
 
-  const { loading, data } = useQuery(QUERY_PRODUCTS);
+	const { loading, data } = useQuery(QUERY_PRODUCTS);
 
-  useEffect(
+	useEffect(
 		() => {
-			// if there's data to be stored
+			// if data to store
 			if (data) {
-				// store it in the global state object
+				// store in the global state object
 				dispatch(updateProducts(data.products));
 
-        data.products.forEach((product) => {
+				data.products.forEach((product) => {
 					idbPromise('products', 'put', product);
 				});
-				// check if 'loading' is undefined in 'useQuery()' hook. no connection to server
 			} else if (!loading) {
-				// get all data from 'products' store
+				// offline, get all data from the 'products' store
 				idbPromise('products', 'get').then((products) => {
 					dispatch(updateProducts(products));
 				});
@@ -36,17 +36,17 @@ function ProductList() {
 		[ data, loading, dispatch ]
 	);
 
-  function filterProducts() {
+	function filterProducts() {
 		if (!currentCategory) {
 			return state.products;
 		}
 
-    return state.products.filter(
+		return state.products.filter(
 			(product) => product.category._id === currentCategory
 		);
 	}
 
-  return (
+	return (
 		<div className="my-2">
 			<h2>Our Products:</h2>
 			{state.products.length ? (
